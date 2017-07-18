@@ -66,42 +66,43 @@ router.post( deviceURI, (req, res) => {
   if (req.params.device === NETATMO) {
     // Handle Netatmo message
     /** JSON expected
-    {
-      "id": "d48ddcac-e0ae-4940-b3d3-a01d567f87c9",
-      "clientId": "72d4e7be-7542-4298-a033-34fe18c1d242",
-      "source": "83CE7F71-E9EF-4356-AC99-0C2F0CC4307D",
-      "destination": "",
-      "priority": "LOW",
-      "reliability": "BEST_EFFORT",
-      "eventTime": 1500410826468,
-      "eventTimeAsString": "2017-07-18T20:47:06Z",
-      "sender": "",
-      "type": "DATA",
-      "properties": {},
-      "direction": "FROM_DEVICE",
-      "receivedTime": 1500410826604,
-      "receivedTimeAsString": "2017-07-18T20:47:06Z",
-      "sentTime": 1500410826613,
-      "sentTimeAsString": "2017-07-18T20:47:06Z",
-      "payload": {
-        "format": "urn:com:oracle:iot:device:timg:vfsmarthospitality:thermostat:attributes",
-        "data": {
-          "$(source)_location": "BARCELONA",
-          "moduleName": "Oracle Spain Netatmo",
-          "temperature": 30.5,
-          "deviceId": "70:ee:50:1a:d0:12",
-          "setpointTemp": 0,
-          "moduleMac": "04:00:00:1a:b1:7c"
-        }
-      }
-    }
+    [
+       {
+          "id":"b9e9e3b3-c165-4bb7-a282-bff94b84c568",
+          "clientId":"30b3d9c6-3711-40ef-9640-4353b1202736",
+          "source":"83CE7F71-E9EF-4356-AC99-0C2F0CC4307D",
+          "destination":"",
+          "priority":"LOW",
+          "reliability":"BEST_EFFORT",
+          "eventTime":1500414626585,
+          "sender":"",
+          "type":"DATA",
+          "properties":{
+
+          },
+          "direction":"FROM_DEVICE",
+          "receivedTime":1500414626711,
+          "sentTime":1500414626719,
+          "payload":{
+             "format":"urn:com:oracle:iot:device:timg:vfsmarthospitality:thermostat:attributes",
+             "data":{
+                "$(source)_location":"BARCELONA",
+                "moduleName":"Oracle Spain Netatmo",
+                "temperature":31.2,
+                "deviceId":"70:ee:50:1a:d0:12",
+                "setpointTemp":0,
+                "moduleMac":"04:00:00:1a:b1:7c"
+             }
+          }
+       }
+    ]
     **/
 
-    if ( !req.body || !req.body.payload || !req.body.payload.data || !req.body.payload.data.temperature || !("$(source)_location" in req.body.payload.data) ) {
+    if ( !req.body || !req.body[0].payload || !req.body[0].payload.data || !req.body[0].payload.data.temperature || !("$(source)_location" in req.body[0].payload.data) ) {
       log.error("", "Invalid JSON received for %s device event: %s", req.params.device, JSON.stringify(req.body))
       return;
     }
-    var URI = DBURI + '/' + req.body.payload.data["$(source)_location"] + '/' + req.body.payload.data.temperature;
+    var URI = DBURI + '/' + req.body[0].payload.data["$(source)_location"] + '/' + req.body[0].payload.data.temperature;
     dbClient.post(URI, (err, _req, _res, data) => {
       if (err) {
         log.error("","[POST] Error from DB call: " + err.statusCode);
