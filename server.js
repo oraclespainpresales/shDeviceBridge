@@ -147,7 +147,7 @@ router.post( deviceURI, (req, res) => {
         url: PROXYURL,
         retry: false,
         connectTimeout: 1000,
-        requestTimeout: 2000
+        requestTimeout: 5000
       });
       proxyClient.get(UNLATCHURI, (__err, __req, __res) => {
         if (__err) {
