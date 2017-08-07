@@ -159,7 +159,7 @@ router.post( deviceURI, (req, res) => {
           res.status(200).json( { error: errorMsg, uri: PROXYURL + UNLATCHURI } );
           return;
         }
-        res.status(200).send(__res.body);
+        res.status(200).json(__res.body);
         return;
       });
     });
