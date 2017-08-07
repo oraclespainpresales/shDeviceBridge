@@ -147,7 +147,7 @@ router.post( deviceURI, (req, res) => {
         url: PROXYURL,
         retry: false,
         connectTimeout: 1000,
-        requestTimeout: 10000
+        requestTimeout: 20000
       });
       log.verbose("", "Sending UNLATCH request...");
       proxyClient.get(UNLATCHURI, (__err, __req, __res) => {
