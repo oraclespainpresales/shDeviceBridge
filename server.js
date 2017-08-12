@@ -195,6 +195,7 @@ router.post( deviceURI, (req, res) => {
         requestTimeout: 20000
       });
       var URI = util.format(COZMOCOMMANDS, req.params.demozone, req.params.op);
+      console.log(URI);
       dbClient.get(URI, (_err, _req, _res) => {
         if (_err) {
           var errorMsg = util.format("Error retrieving DEMOZONE COZMO COMMANDS for %s: %s", req.params.demozone.toUpperCase(), _err.statusCode);
