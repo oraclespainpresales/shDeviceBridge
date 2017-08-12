@@ -167,21 +167,38 @@ router.post( deviceURI, (req, res) => {
       });
     });
   } else if (req.params.device === COZMO) {
-    if (!req.params.op || !req.params.demozone) {
+    if (!req.body)
       res.status(400).end();
       return;
     }
-    var URI = util.format(BASEPORTURI, req.params.demozone.toUpperCase());
+    var jBody;
+    try {
+      jBody = JSON.parse(req.body);
+    } catch (e) {
+      var errorMsg = util.format("Invalid JSON body: %s", req.body);
+      log.error("", errorMsg);
+      res.status(400).send(errorMsg);
+      return;
+    }
+    if (!jBody.demozone || !jBody.op) {
+      var errorMsg = util.format("Invalid JSON body: %s", req.body);
+      log.error("", errorMsg);
+      res.status(400).send(errorMsg);
+      return;
+    }
+    var demozone = jBody.demozone:
+    var op = jBody.op;
+    var URI = util.format(BASEPORTURI, demozone.toUpperCase());
     dbClient.get(URI, (_err, _req, _res) => {
       if (_err) {
-        var errorMsg = util.format("Error retrieving DEMOZONE information for %s: %s", req.params.demozone.toUpperCase(), _err.statusCode);
+        var errorMsg = util.format("Error retrieving DEMOZONE information for %s: %s", demozone.toUpperCase(), _err.statusCode);
         log.error("", errorMsg);
         log.error("", "URI: " + URI);
         res.status(500).send(errorMsg);
         return;
       };
       if (!_res.body || !JSON.parse(_res.body).baseport) {
-        var errorMsg = util.format("Error: No data retrieved for DEMOZONE %s", req.params.demozone.toUpperCase());
+        var errorMsg = util.format("Error: No data retrieved for DEMOZONE %s", demozone.toUpperCase());
         log.error("", errorMsg);
         res.status(500).send(errorMsg);
         return;
@@ -194,17 +211,17 @@ router.post( deviceURI, (req, res) => {
         connectTimeout: 1000,
         requestTimeout: 20000
       });
-      var URI = util.format(COZMOCOMMANDS, req.params.demozone, req.params.op);
+      var URI = util.format(COZMOCOMMANDS, demozone, op);
       dbClient.get(URI, (__err, __req, __res) => {
         if (__err) {
-          var errorMsg = util.format("Error retrieving DEMOZONE COZMO COMMANDS for %s: %s", _req.params.demozone.toUpperCase(), __err.statusCode);
+          var errorMsg = util.format("Error retrieving DEMOZONE COZMO COMMANDS for %s: %s", demozone.toUpperCase(), __err.statusCode);
           log.error("", errorMsg);
           log.error("", "URI: " + URI);
           res.status(500).send(errorMsg);
           return;
         };
         if (!__res.body || __res.status === 404) {
-          var errorMsg = util.format("COZMO commands for demozone %s, not found", req.params.demozone.toUpperCase());
+          var errorMsg = util.format("COZMO commands for demozone %s, not found", demozone.toUpperCase());
           log.error("", errorMsg);
           res.status(400).send(errorMsg);
           return;
@@ -215,12 +232,12 @@ router.post( deviceURI, (req, res) => {
         try {
           commands = JSON.parse(jBody.commands);
         } catch (e) {
-          var errorMsg = util.format("Invalid JSON commands for demozone %s: %s", req.params.demozone.toUpperCase(), e.message);
+          var errorMsg = util.format("Invalid JSON commands for demozone %s: %s", demozone.toUpperCase(), e.message);
           log.error("", errorMsg);
           res.status(400).send(errorMsg);
           return;
         }
-        log.verbose("", "Sending COZMO %s ACTION request...", req.params.op);
+        log.verbose("", "Sending COZMO %s ACTION request...", op);
         proxyClient.post(COZMOURI, commands, (___err, ___req, ___res) => {
           log.verbose("", "COZMO ACTION request callback invoked...");
           if (___err) {
