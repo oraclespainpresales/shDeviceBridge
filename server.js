@@ -186,7 +186,7 @@ router.post( deviceURI, (req, res) => {
       res.status(400).send(errorMsg);
       return;
     }
-    var demozone = jBody.demozone:
+    var demozone = jBody.demozone;
     var op = jBody.op;
     var URI = util.format(BASEPORTURI, demozone.toUpperCase());
     dbClient.get(URI, (_err, _req, _res) => {
