@@ -203,15 +203,17 @@ router.post( deviceURI, (req, res) => {
           res.status(500).send(errorMsg);
           return;
         };
-        if (!__req.body || __res.status === 404) {
+        if (!__res.body || __res.status === 404) {
           var errorMsg = util.format("COZMO commands for demozone %s, not found", req.params.demozone.toUpperCase());
           log.error("", errorMsg);
           res.status(400).send(errorMsg);
           return;
         }
-        var commands;
+        var commands
+          , jBody = JSON.parse(__res.body);
+        ;
         try {
-          commands = JSON.parse(__req.body.commands);
+          commands = JSON.parse(jBody.commands);
         } catch (e) {
           var errorMsg = util.format("Invalid JSON commands for demozone %s: %s", req.params.demozone.toUpperCase(), e.message);
           log.error("", errorMsg);
