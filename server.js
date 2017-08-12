@@ -25,7 +25,7 @@ const restURI       = '/devices'
     , OPNETATMOSET  = "SET"
     , OPNUKIUNLATCH = "UNLATCH"
     , UNLATCHURI    = "/" + OPNUKIUNLATCH
-    , COZMOURI      = "/" + COZMO
+    , COZMOURI      = "/Cozmo"
 ;
 
 log.stream = process.stdout;
@@ -220,7 +220,6 @@ router.post( deviceURI, (req, res) => {
           res.status(400).send(errorMsg);
           return;
         }
-
         log.verbose("", "Sending COZMO %s ACTION request...", req.params.op);
         proxyClient.post(COZMOURI, commands, (___err, ___req, ___res) => {
           log.verbose("", "COZMO ACTION request callback invoked...");
