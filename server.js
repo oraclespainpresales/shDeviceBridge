@@ -15,14 +15,17 @@ const restURI       = '/devices'
     , deviceURI     = '/:device/:op?/:demozone?'
     , NETATMO       = "NETATMO"
     , NUKI          = "NUKI"
+    , COZMO         = "COZMO"
     , DBHOST        = "https://new.apex.digitalpracticespain.com"
     , APIPCSHOST    = "http://new.local.proxy.digitalpracticespain.com"
     , NETATMOURI    = "/ords/pdb1/smarthospitality/netatmo/set"
     , BASEPORTURI   = "/ords/pdb1/smarthospitality/admin/setup/baseport/%s"
+    , COZMOCOMMANDS = "/ords/pdb1/smarthospitality/cozmo/action/%s/%s"
     , APIPPROXYPORT = "18%s1"
     , OPNETATMOSET  = "SET"
     , OPNUKIUNLATCH = "UNLATCH"
     , UNLATCHURI    = "/" + OPNUKIUNLATCH
+    , COZMOURI      = "/" + COZMO
 ;
 
 log.stream = process.stdout;
@@ -163,6 +166,74 @@ router.post( deviceURI, (req, res) => {
         return;
       });
     });
+  } else if (req.params.device === COZMO) {
+    if (!req.params.op || !req.params.demozone) {
+      res.status(400).end();
+      return;
+    }
+
+    dbClient.get(URI, (err, _req, _res) => {
+      if (err) {
+        var errorMsg = util.format("Error retrieving DEMOZONE information for %s: %s", req.params.demozone.toUpperCase(), err.statusCode);
+        log.error("", errorMsg);
+        log.error("", "URI: " + URI);
+        res.status(500).send(errorMsg);
+        return;
+      };
+      if (!_res.body || !JSON.parse(_res.body).baseport) {
+        var errorMsg = util.format("Error: No data retrieved for DEMOZONE %s", req.params.demozone.toUpperCase());
+        log.error("", errorMsg);
+        res.status(500).send(errorMsg);
+        return;
+      }
+      var PROXYURL = APIPCSHOST + ":" + util.format(APIPPROXYPORT, JSON.parse(_res.body).baseport);
+      log.verbose("", "PROXY URL: %s", PROXYURL);
+      var proxyClient = restify.createJsonClient({
+        url: PROXYURL,
+        retry: false,
+        connectTimeout: 1000,
+        requestTimeout: 20000
+      });
+      var URI = util.format(COZMOCOMMANDS, req.params.demozone, req.params.op);
+      dbClient.get(URI, (_err, _req, _res) => {
+        if (_err) {
+          var errorMsg = util.format("Error retrieving DEMOZONE COZMO COMMANDS for %s: %s", req.params.demozone.toUpperCase(), _err.statusCode);
+          log.error("", errorMsg);
+          log.error("", "URI: " + URI);
+          res.status(500).send(errorMsg);
+          return;
+        };
+        if (!req.body || !req.body.commands || _res.status === 404) {
+          var errorMsg = util.format("COZMO commands for demozone %s, not found", req.params.demozone.toUpperCase());
+          log.error("", errorMsg);
+          res.status(400).send(errorMsg);
+          return;
+        }
+        var commands;
+        try {
+          commands = JSON.parse(req.body.commands);
+        } catch (e) {
+          var errorMsg = util.format("Invalid JSON commands for demozone %s: %s", req.params.demozone.toUpperCase(), e.message);
+          log.error("", errorMsg);
+          res.status(400).send(errorMsg);
+          return;
+        }
+
+        log.verbose("", "Sending COZMO %s ACTION request...", req.params.op);
+        proxyClient.post(COZMOURI, commands, (__err, __req, __res) => {
+          log.verbose("", "COZMO ACTION request callback invoked...");
+          if (__err) {
+            var errorMsg = util.format("Error in COZMO ACTION: %s", __err.message);
+            log.error("", errorMsg);
+            // We return a 200 CODE in order to avoid any retry from BPEL
+            res.status(200).json( { error: errorMsg, uri: PROXYURL + COZMOURI } );
+            return;
+          }
+          res.status(200).json(__res.body);
+          return;
+        });
+      });
+    )};
   } else {
     var errorMsg = util.format("Device %s not recognized. Ignoring", req.params.device);
     log.error("", errorMsg);
