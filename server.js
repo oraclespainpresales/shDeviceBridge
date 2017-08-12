@@ -203,8 +203,7 @@ router.post( deviceURI, (req, res) => {
           res.status(500).send(errorMsg);
           return;
         };
-        console.log(__res.body);
-        if (!__req.body || !__req.body.commands || __res.status === 404) {
+        if (!__req.body || __res.status === 404) {
           var errorMsg = util.format("COZMO commands for demozone %s, not found", req.params.demozone.toUpperCase());
           log.error("", errorMsg);
           res.status(400).send(errorMsg);
