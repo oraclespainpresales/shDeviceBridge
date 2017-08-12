@@ -171,23 +171,14 @@ router.post( deviceURI, (req, res) => {
       res.status(400).end();
       return;
     }
-    var jBody;
-    try {
-      jBody = JSON.parse(req.body);
-    } catch (e) {
-      var errorMsg = util.format("Invalid JSON body: %s", req.body);
+    if (!req.body.demozone || !req.body.op) {
+      var errorMsg = util.format("Invalid JSON body: %j", req.body);
       log.error("", errorMsg);
       res.status(400).send(errorMsg);
       return;
     }
-    if (!jBody.demozone || !jBody.op) {
-      var errorMsg = util.format("Invalid JSON body: %s", req.body);
-      log.error("", errorMsg);
-      res.status(400).send(errorMsg);
-      return;
-    }
-    var demozone = jBody.demozone;
-    var op = jBody.op;
+    var demozone = req.body.demozone;
+    var op = req.body.op;
     var URI = util.format(BASEPORTURI, demozone.toUpperCase());
     dbClient.get(URI, (_err, _req, _res) => {
       if (_err) {
