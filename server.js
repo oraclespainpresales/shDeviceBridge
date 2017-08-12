@@ -171,7 +171,7 @@ router.post( deviceURI, (req, res) => {
       res.status(400).end();
       return;
     }
-
+    var URI = util.format(BASEPORTURI, req.params.demozone.toUpperCase());
     dbClient.get(URI, (err, _req, _res) => {
       if (err) {
         var errorMsg = util.format("Error retrieving DEMOZONE information for %s: %s", req.params.demozone.toUpperCase(), err.statusCode);
