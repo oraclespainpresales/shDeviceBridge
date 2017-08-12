@@ -172,9 +172,9 @@ router.post( deviceURI, (req, res) => {
       return;
     }
     var URI = util.format(BASEPORTURI, req.params.demozone.toUpperCase());
-    dbClient.get(URI, (err, _req, _res) => {
-      if (err) {
-        var errorMsg = util.format("Error retrieving DEMOZONE information for %s: %s", req.params.demozone.toUpperCase(), err.statusCode);
+    dbClient.get(URI, (_err, _req, _res) => {
+      if (_err) {
+        var errorMsg = util.format("Error retrieving DEMOZONE information for %s: %s", req.params.demozone.toUpperCase(), _err.statusCode);
         log.error("", errorMsg);
         log.error("", "URI: " + URI);
         res.status(500).send(errorMsg);
@@ -196,15 +196,15 @@ router.post( deviceURI, (req, res) => {
       });
       var URI = util.format(COZMOCOMMANDS, req.params.demozone, req.params.op);
       console.log(URI);
-      dbClient.get(URI, (_err, _req, _res) => {
-        if (_err) {
-          var errorMsg = util.format("Error retrieving DEMOZONE COZMO COMMANDS for %s: %s", req.params.demozone.toUpperCase(), _err.statusCode);
+      dbClient.get(URI, (__err, __req, __res) => {
+        if (__err) {
+          var errorMsg = util.format("Error retrieving DEMOZONE COZMO COMMANDS for %s: %s", _req.params.demozone.toUpperCase(), __err.statusCode);
           log.error("", errorMsg);
           log.error("", "URI: " + URI);
           res.status(500).send(errorMsg);
           return;
         };
-        if (!req.body || !req.body.commands || _res.status === 404) {
+        if (!__req.body || !__req.body.commands || __res.status === 404) {
           var errorMsg = util.format("COZMO commands for demozone %s, not found", req.params.demozone.toUpperCase());
           log.error("", errorMsg);
           res.status(400).send(errorMsg);
@@ -212,7 +212,7 @@ router.post( deviceURI, (req, res) => {
         }
         var commands;
         try {
-          commands = JSON.parse(req.body.commands);
+          commands = JSON.parse(__req.body.commands);
         } catch (e) {
           var errorMsg = util.format("Invalid JSON commands for demozone %s: %s", req.params.demozone.toUpperCase(), e.message);
           log.error("", errorMsg);
@@ -221,16 +221,16 @@ router.post( deviceURI, (req, res) => {
         }
 
         log.verbose("", "Sending COZMO %s ACTION request...", req.params.op);
-        proxyClient.post(COZMOURI, commands, (__err, __req, __res) => {
+        proxyClient.post(COZMOURI, commands, (___err, ___req, ___res) => {
           log.verbose("", "COZMO ACTION request callback invoked...");
-          if (__err) {
-            var errorMsg = util.format("Error in COZMO ACTION: %s", __err.message);
+          if (___err) {
+            var errorMsg = util.format("Error in COZMO ACTION: %s", ___err.message);
             log.error("", errorMsg);
             // We return a 200 CODE in order to avoid any retry from BPEL
             res.status(200).json( { error: errorMsg, uri: PROXYURL + COZMOURI } );
             return;
           }
-          res.status(200).json(__res.body);
+          res.status(200).json(___res.body);
           return;
         });
       });
