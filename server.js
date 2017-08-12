@@ -233,7 +233,7 @@ router.post( deviceURI, (req, res) => {
           return;
         });
       });
-    )};
+    });
   } else {
     var errorMsg = util.format("Device %s not recognized. Ignoring", req.params.device);
     log.error("", errorMsg);
