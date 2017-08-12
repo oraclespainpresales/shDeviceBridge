@@ -128,6 +128,7 @@ router.post( deviceURI, (req, res) => {
       res.status(400).end();
       return;
     }
+    log.info("", "Request received for %s at %s", req.params.device, req.params.demozone);
     // First get the demozone's BASEPORT for Proxy communication with APIPCS deployed on NUC
     var URI = util.format(BASEPORTURI, req.params.demozone.toUpperCase());
     dbClient.get(URI, (err, _req, _res) => {
@@ -171,7 +172,7 @@ router.post( deviceURI, (req, res) => {
       res.status(400).end();
       return;
     }
-    log.verbose("", "Request received for %s: %j", req.params.device, req.body);
+    log.info("", "Request received for %s: %j", req.params.device, req.body);
     if (!req.body.demozone || !req.body.op) {
       var errorMsg = util.format("Invalid JSON body: %j", req.body);
       log.error("", errorMsg);
