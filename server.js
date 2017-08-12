@@ -167,7 +167,7 @@ router.post( deviceURI, (req, res) => {
       });
     });
   } else if (req.params.device === COZMO) {
-    if (!req.body)
+    if (!req.body) {
       res.status(400).end();
       return;
     }
