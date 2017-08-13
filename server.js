@@ -60,6 +60,18 @@ process.on('SIGINT', function() {
 });
 // Main handlers registration - END
 
+// COZMO stuff - BEGIN
+const CUBE1 = "1"
+    , CUBE2 = "2"
+    , CUBE3 = "3"
+;
+const SERVICES = [
+  { service: "vegan menu",      cube: CUBE1 },
+  { service: "hamburguer menu", cube: CUBE2 },
+  { service: "pizza menu",      cube: CUBE3 }
+];
+// COZMO stuff - END
+
 // REST engine initial setup
 const PORT = 30000;
 
@@ -173,7 +185,7 @@ router.post( deviceURI, (req, res) => {
       return;
     }
     log.info("", "Request received for %s: %j", req.params.device, req.body);
-    if (!req.body.demozone || !req.body.op) {
+    if (!req.body.demozone || !req.body.op || !req.body.params || !req.body.params.room || !req.body.params.service ) {
       var errorMsg = util.format("Invalid JSON body: %j", req.body);
       log.error("", errorMsg);
       res.status(400).send(errorMsg);
@@ -181,6 +193,16 @@ router.post( deviceURI, (req, res) => {
     }
     var demozone = req.body.demozone.toUpperCase();
     var op = req.body.op.toUpperCase();
+    var params = req.body.params;
+
+    var service = _.find(SERVICES, ['service', params.service.toLowerCase() ]);
+    if ( !service) {
+      var errorMsg = util.format("Unknown service name: %s", params.service);
+      log.error("", errorMsg);
+      res.status(400).send(errorMsg);
+      return;
+    }
+
     var URI = util.format(BASEPORTURI, demozone);
     dbClient.get(URI, (_err, _req, _res) => {
       if (_err) {
@@ -230,7 +252,12 @@ router.post( deviceURI, (req, res) => {
           res.status(400).send(errorMsg);
           return;
         }
-        log.verbose("", "Sending COZMO %s ACTION request...", op);
+
+        // Substitute the CUBE in the JSON
+        var _commands = JSON.stringify(commands).replace("$1", service.cube);
+        commands = JSON.parse(_commands);
+
+        log.verbose("", "Sending COZMO %s ACTION request with commands: %j", op, commands);
         proxyClient.post(COZMOURI, commands, (___err, ___req, ___res) => {
           log.verbose("", "COZMO ACTION request callback invoked...");
           if (___err) {
