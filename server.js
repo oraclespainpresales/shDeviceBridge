@@ -76,10 +76,7 @@ const SERVICES = [
 const PORT = 30000;
 
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json({ verify: (req, res, buf, encoding) => {
-    console.log(encoding);
-  }
-}));
+app.use(bodyParser.json());
 app.use(cors());
 
 // REST stuff - BEGIN
