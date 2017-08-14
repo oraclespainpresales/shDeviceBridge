@@ -257,7 +257,7 @@ router.post( deviceURI, (req, res) => {
         }
 
         // Substitute the CUBE in the JSON
-        var _commands = JSON.stringify(commands).replace("$1", service.cube);
+        var _commands = JSON.stringify(commands).replace(/\$1/g, service.cube);
         commands = JSON.parse(_commands);
 
         log.verbose("", "Sending COZMO %s ACTION request with commands: %j", op, commands);
