@@ -17,7 +17,8 @@ const restURI       = '/devices'
     , NUKI          = "NUKI"
     , COZMO         = "COZMO"
     , DBHOST        = "https://new.apex.digitalpracticespain.com"
-    , APIPCSHOST    = "http://new.local.proxy.digitalpracticespain.com"
+//    , APIPCSHOST    = "http://new.local.proxy.digitalpracticespain.com"
+    , COZMOHOST     = "http://cozmowh.ngrok.io"
     , NETATMOURI    = "/ords/pdb1/smarthospitality/netatmo/set"
     , BASEPORTURI   = "/ords/pdb1/smarthospitality/admin/setup/baseport/%s"
     , COZMOCOMMANDS = "/ords/pdb1/smarthospitality/cozmo/action/%s/%s"
@@ -25,7 +26,8 @@ const restURI       = '/devices'
     , OPNETATMOSET  = "SET"
     , OPNUKIUNLATCH = "UNLATCH"
     , UNLATCHURI    = "/" + OPNUKIUNLATCH
-    , COZMOURI      = "/Cozmo"
+//    , COZMOURI      = "/Cozmo"
+    , COZMOURI      = "/snippets/"
 ;
 
 log.stream = process.stdout;
@@ -218,7 +220,8 @@ router.post( deviceURI, (req, res) => {
         res.status(500).send(errorMsg);
         return;
       }
-      var PROXYURL = APIPCSHOST + ":" + util.format(APIPPROXYPORT, JSON.parse(_res.body).baseport);
+//      var PROXYURL = APIPCSHOST + ":" + util.format(APIPPROXYPORT, JSON.parse(_res.body).baseport);
+      var PROXYURL = COZMOHOST;
       log.verbose("", "PROXY URL: %s", PROXYURL);
       var proxyClient = restify.createJsonClient({
         url: PROXYURL,
