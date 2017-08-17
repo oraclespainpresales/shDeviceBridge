@@ -163,7 +163,7 @@ router.post( deviceURI, (req, res) => {
       }
 //      var PROXYURL = APIPCSHOST + ":" + util.format(APIPPROXYPORT, JSON.parse(_res.body).baseport);
       var NGROKURL = JSON.parse(_res.body).urlhttp;
-      log.verbose("", "NGROK URL: %s", PROXYURL);
+      log.verbose("", "NGROK URL: %s", NGROKURL);
       var proxyClient = restify.createStringClient({
         url: NGROKURL,
         retry: false,
