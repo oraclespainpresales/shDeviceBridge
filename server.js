@@ -172,7 +172,6 @@ router.post( deviceURI, (req, res) => {
       });
       log.verbose("", "Sending UNLATCH request...");
       proxyClient.get(UNLATCHURI, (__err, __req, __res) => {
-        log.verbose("", "UNLATCH request callback invoked...");
         if (__err) {
           var errorMsg = util.format("Error UNLATCHING door: %s", __err.message);
           log.error("", errorMsg);
@@ -180,6 +179,7 @@ router.post( deviceURI, (req, res) => {
           res.status(200).json( { error: errorMsg, uri: NGROKURL + UNLATCHURI } );
           return;
         }
+        log.verbose("", "UNLATCH request callback invoked with result: %j", __res.body);
         res.status(200).json(__res.body);
         return;
       });
