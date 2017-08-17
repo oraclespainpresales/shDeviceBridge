@@ -20,7 +20,8 @@ const restURI       = '/devices'
 //    , APIPCSHOST    = "http://new.local.proxy.digitalpracticespain.com"
     , COZMOHOST     = "http://cozmowh.ngrok.io"
     , NETATMOURI    = "/ords/pdb1/smarthospitality/netatmo/set"
-    , BASEPORTURI   = "/ords/pdb1/smarthospitality/admin/setup/baseport/%s"
+//    , BASEPORTURI   = "/ords/pdb1/smarthospitality/admin/setup/baseport/%s"
+    , NGROKSETTINGS = "/ords/pdb1/smarthospitality/ngrok/get/%s/%s/%s"
     , COZMOCOMMANDS = "/ords/pdb1/smarthospitality/cozmo/action/%s/%s"
     , APIPPROXYPORT = "18%s1"
     , OPNETATMOSET  = "SET"
@@ -144,25 +145,27 @@ router.post( deviceURI, (req, res) => {
     }
     log.info("", "Request received for %s at %s", req.params.device, req.params.demozone);
     // First get the demozone's BASEPORT for Proxy communication with APIPCS deployed on NUC
-    var URI = util.format(BASEPORTURI, req.params.demozone.toUpperCase());
+    // Get current NGROK url to open the door
+    var URI = util.format(NGROKSETTINGS, req.params.demozone.toUpperCase(), "nuc", "gateway");
     dbClient.get(URI, (err, _req, _res) => {
       if (err) {
-        var errorMsg = util.format("Error retrieving DEMOZONE information for %s: %s", req.params.demozone.toUpperCase(), err.statusCode);
+        var errorMsg = util.format("Error retrieving NGROK information for %s: %s", req.params.demozone.toUpperCase(), err.statusCode);
         log.error("", errorMsg);
         log.error("", "URI: " + URI);
         res.status(500).send(errorMsg);
         return;
       };
-      if (!_res.body || !JSON.parse(_res.body).baseport) {
-        var errorMsg = util.format("Error: No data retrieved for DEMOZONE %s", req.params.demozone.toUpperCase());
+      if (!_res.body || !JSON.parse(_res.body).urlhttp) {
+        var errorMsg = util.format("Error: No NGROK data retrieved for DEMOZONE %s", req.params.demozone.toUpperCase());
         log.error("", errorMsg);
         res.status(500).send(errorMsg);
         return;
       }
-      var PROXYURL = APIPCSHOST + ":" + util.format(APIPPROXYPORT, JSON.parse(_res.body).baseport);
-      log.verbose("", "PROXY URL: %s", PROXYURL);
+//      var PROXYURL = APIPCSHOST + ":" + util.format(APIPPROXYPORT, JSON.parse(_res.body).baseport);
+      var NGROKURL = JSON.parse(_res.body).urlhttp;
+      log.verbose("", "NGROK URL: %s", PROXYURL);
       var proxyClient = restify.createStringClient({
-        url: PROXYURL,
+        url: NGROKURL,
         retry: false,
         connectTimeout: 1000,
         requestTimeout: 20000
@@ -174,7 +177,7 @@ router.post( deviceURI, (req, res) => {
           var errorMsg = util.format("Error UNLATCHING door: %s", __err.message);
           log.error("", errorMsg);
           // We return a 200 CODE in order to avoid any retry from BPEL
-          res.status(200).json( { error: errorMsg, uri: PROXYURL + UNLATCHURI } );
+          res.status(200).json( { error: errorMsg, uri: NGROKURL + UNLATCHURI } );
           return;
         }
         res.status(200).json(__res.body);
