@@ -209,7 +209,7 @@ router.post( deviceURI, (req, res) => {
     }
 
 //    var URI = util.format(BASEPORTURI, demozone);
-    var URI = util.format(NGROKSETTINGS, req.params.demozone.toUpperCase(), "kioskin", "cozmo");
+    var URI = util.format(NGROKSETTINGS, demozone, "kioskin", "cozmo");
     dbClient.get(URI, (_err, _req, _res) => {
       if (_err) {
         var errorMsg = util.format("Error retrieving NGROK information for %s: %s", demozone, _err.statusCode);
