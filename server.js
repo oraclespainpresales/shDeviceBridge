@@ -18,7 +18,7 @@ const restURI       = '/devices'
     , COZMO         = "COZMO"
     , DBHOST        = "https://new.apex.digitalpracticespain.com"
 //    , APIPCSHOST    = "http://new.local.proxy.digitalpracticespain.com"
-    , COZMOHOST     = "http://cozmowh.ngrok.io"
+//    , COZMOHOST     = "http://cozmowh.ngrok.io"
     , NETATMOURI    = "/ords/pdb1/smarthospitality/netatmo/set"
 //    , BASEPORTURI   = "/ords/pdb1/smarthospitality/admin/setup/baseport/%s"
     , NGROKSETTINGS = "/ords/pdb1/smarthospitality/ngrok/get/%s/%s/%s"
@@ -208,23 +208,24 @@ router.post( deviceURI, (req, res) => {
       return;
     }
 
-    var URI = util.format(BASEPORTURI, demozone);
+//    var URI = util.format(BASEPORTURI, demozone);
+    var URI = util.format(NGROKSETTINGS, req.params.demozone.toUpperCase(), "kioskin", "cozmo");
     dbClient.get(URI, (_err, _req, _res) => {
       if (_err) {
-        var errorMsg = util.format("Error retrieving DEMOZONE information for %s: %s", demozone, _err.statusCode);
+        var errorMsg = util.format("Error retrieving NGROK information for %s: %s", demozone, _err.statusCode);
         log.error("", errorMsg);
         log.error("", "URI: " + URI);
         res.status(500).send(errorMsg);
         return;
       };
-      if (!_res.body || !JSON.parse(_res.body).baseport) {
+      if (!_res.body || !JSON.parse(_res.body).urlhttp) {
         var errorMsg = util.format("Error: No data retrieved for DEMOZONE %s", demozone);
         log.error("", errorMsg);
         res.status(500).send(errorMsg);
         return;
       }
 //      var PROXYURL = APIPCSHOST + ":" + util.format(APIPPROXYPORT, JSON.parse(_res.body).baseport);
-      var PROXYURL = COZMOHOST;
+      var PROXYURL = JSON.parse(_res.body).urlhttp;
       log.verbose("", "PROXY URL: %s", PROXYURL);
       var proxyClient = restify.createJsonClient({
         url: PROXYURL,
