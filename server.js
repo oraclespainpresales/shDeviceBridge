@@ -69,9 +69,9 @@ const CUBE1 = "1"
     , CUBE3 = "3"
 ;
 const SERVICES = [
-  { service: "vegan menu",      cube: CUBE1 },
-  { service: "hamburguer menu", cube: CUBE2 },
-  { service: "pizza menu",      cube: CUBE3 }
+  { service: "vegan menu",      cube: CUBE3 },
+  { service: "hamburguer menu", cube: CUBE1 },
+  { service: "pizza menu",      cube: CUBE2 }
 ];
 // COZMO stuff - END
 
