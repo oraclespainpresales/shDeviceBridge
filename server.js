@@ -67,6 +67,8 @@ process.on('SIGINT', function() {
 const CUBE1 = "1"
     , CUBE2 = "2"
     , CUBE3 = "3"
+    , SERVICE = "SERVICE"
+    , MAINTENANCE = "MAINTENANCE"
 ;
 const SERVICES = [
   { service: "vegan menu",      cube: CUBE3 },
@@ -190,12 +192,27 @@ router.post( deviceURI, (req, res) => {
       return;
     }
     log.info("", "Request received for %s: %j", req.params.device, req.body);
-    if (!req.body.demozone || !req.body.op || !req.body.params || !req.body.params.room || !req.body.params.service ) {
+    if (!req.body.demozone || !req.body.op) {
       var errorMsg = util.format("Invalid JSON body: %j", req.body);
       log.error("", errorMsg);
       res.status(400).send(errorMsg);
       return;
     }
+
+    if (req.body.op.toUpperCase() == SERVICE && (!req.body.params || !req.body.params.room || !req.body.params.service)) {
+      var errorMsg = util.format("Invalid JSON body: %j", req.body);
+      log.error("", errorMsg);
+      res.status(400).send(errorMsg);
+      return;
+    }
+
+    if (req.body.op.toUpperCase() == MAINTENANCE && req.body.params) {
+      var errorMsg = util.format("Invalid JSON body: %j", req.body);
+      log.error("", errorMsg);
+      res.status(400).send(errorMsg);
+      return;
+    }
+
     var demozone = req.body.demozone.toUpperCase();
     var op = req.body.op.toUpperCase();
     var params = req.body.params;
@@ -260,9 +277,11 @@ router.post( deviceURI, (req, res) => {
           return;
         }
 
-        // Substitute the CUBE in the JSON
-        var _commands = JSON.stringify(commands).replace(/\$1/g, service.cube);
-        commands = JSON.parse(_commands);
+        if (req.body.op.toUpperCase() == SERVICE) {
+          // Substitute the CUBE in the JSON
+          var _commands = JSON.stringify(commands).replace(/\$1/g, service.cube);
+          commands = JSON.parse(_commands);
+        }
 
         log.verbose("", "Sending COZMO %s ACTION request with commands: %j", op, commands);
         proxyClient.post(COZMOURI, commands, (___err, ___req, ___res) => {
