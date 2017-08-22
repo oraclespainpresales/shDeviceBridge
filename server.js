@@ -217,14 +217,6 @@ router.post( deviceURI, (req, res) => {
     var op = req.body.op.toUpperCase();
     var params = req.body.params;
 
-    var service = _.find(SERVICES, ['service', params.service.toLowerCase() ]);
-    if ( !service) {
-      var errorMsg = util.format("Unknown service name: %s", params.service);
-      log.error("", errorMsg);
-      res.status(400).send(errorMsg);
-      return;
-    }
-
 //    var URI = util.format(BASEPORTURI, demozone);
     var URI = util.format(NGROKSETTINGS, demozone, "kioskin", "cozmo");
     dbClient.get(URI, (_err, _req, _res) => {
@@ -278,6 +270,13 @@ router.post( deviceURI, (req, res) => {
         }
 
         if (req.body.op.toUpperCase() == SERVICE) {
+          var service = _.find(SERVICES, ['service', params.service.toLowerCase() ]);
+          if ( !service) {
+            var errorMsg = util.format("Unknown service name: %s", params.service);
+            log.error("", errorMsg);
+            res.status(400).send(errorMsg);
+            return;
+          }
           // Substitute the CUBE in the JSON
           var _commands = JSON.stringify(commands).replace(/\$1/g, service.cube);
           commands = JSON.parse(_commands);
