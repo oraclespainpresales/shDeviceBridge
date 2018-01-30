@@ -26,7 +26,8 @@ const restURI       = '/devices'
     , APIPPROXYPORT = "18%s1"
     , OPNETATMOSET  = "SET"
     , OPNUKIUNLATCH = "UNLATCH"
-    , UNLATCHURI    = "/" + OPNUKIUNLATCH
+//    , UNLATCHURI    = "/" + OPNUKIUNLATCH
+    , UNLATCHURI    = "/admin/nuki/" + OPNUKIUNLATCH
 //    , COZMOURI      = "/Cozmo"
     , COZMOURI      = "/snippets/"
 ;
@@ -148,7 +149,10 @@ router.post( deviceURI, (req, res) => {
     log.info("", "Request received for %s at %s", req.params.device, req.params.demozone);
     // First get the demozone's BASEPORT for Proxy communication with APIPCS deployed on NUC
     // Get current NGROK url to open the door
-    var URI = util.format(NGROKSETTINGS, req.params.demozone.toUpperCase(), "nuc", "gateway");
+//    var URI = util.format(NGROKSETTINGS, req.params.demozone.toUpperCase(), "nuc", "gateway");
+
+    var URI = util.format(NGROKSETTINGS, req.params.demozone.toUpperCase(), "kioskin", "admin");
+
     dbClient.get(URI, (err, _req, _res) => {
       if (err) {
         var errorMsg = util.format("Error retrieving NGROK information for %s: %s", req.params.demozone.toUpperCase(), err.statusCode);
