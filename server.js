@@ -330,6 +330,6 @@ server.listen(PORT, () => {
 
 serverSSL.listen(PORTSSL, () => {
   _.each(router.stack, (r) => {
-    log.info("","Listening for any '%s' request at http://localhost:%s%s%s", "POST", PORT, restURI, deviceURI);
+    log.info("","Listening for any '%s' request at https://localhost:%s%s%s", "POST", PORTSSL, restURI, deviceURI);
   });
 });
