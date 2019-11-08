@@ -4,10 +4,13 @@
 var express = require('express')
   , restify = require('restify')
   , http = require('http')
+  , https = require('https')
   , bodyParser = require('body-parser')
   , util = require('util')
   , cors = require('cors')
+  , fs = require("fs")
   , log = require('npmlog-ts')
+
   , _ = require('lodash')
 ;
 
@@ -32,15 +35,21 @@ const restURI       = '/devices'
     , COZMOURI      = "/snippets/"
 ;
 
+const optionsSSL = {
+  cert: fs.readFileSync("/u01/ssl/certificate.fullchain.crt").toString(),
+  key: fs.readFileSync("/u01/ssl/certificate.key").toString()
+};
+
 log.stream = process.stdout;
 log.timestamp = true;
 log.level = 'verbose';
 
 // Instantiate classes & servers
-var app      = express()
-  , router   = express.Router()
-  , server   = http.createServer(app)
-  , dbClient = restify.createJsonClient({
+var app       = express()
+  , router    = express.Router()
+  , server    = http.createServer(app)
+  , serverSSL = https.createServer(optionsSSL, app)
+  , dbClient  = restify.createJsonClient({
     url: DBHOST,
     rejectUnauthorized: false
   })
@@ -79,7 +88,9 @@ const SERVICES = [
 // COZMO stuff - END
 
 // REST engine initial setup
-const PORT = 30000;
+const PORT    = 30000
+    , PORTSSL = 30001
+;
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -312,6 +323,12 @@ app.use(restURI, router);
 // REST stuff - END
 
 server.listen(PORT, () => {
+  _.each(router.stack, (r) => {
+    log.info("","Listening for any '%s' request at http://localhost:%s%s%s", "POST", PORT, restURI, deviceURI);
+  });
+});
+
+serverSSL.listen(PORTSSL, () => {
   _.each(router.stack, (r) => {
     log.info("","Listening for any '%s' request at http://localhost:%s%s%s", "POST", PORT, restURI, deviceURI);
   });
